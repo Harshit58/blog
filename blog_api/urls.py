@@ -15,8 +15,6 @@ urlpatterns = [
     path('change-password', ChangePasswordAPIView.as_view(), name='change-password')
 ]
 
-aa
-
 urlpatterns += [
     path('blogs/', include('blog.urls'))
 ]
