@@ -1,0 +1,68 @@
+{% extends "header.html" %}
+{% block content %}
+<h1>My Profile</h1>
+<div>
+    <label>First Name</label>
+    <input type="text" name="first_name" id="first_name" />
+    <br />
+    <label>Last Name</label>
+    <input type="text" name="last_name" id="last_name" />
+    <br />
+    <label>Email</label>
+    <input type="email" name="email" id="email" disabled />
+    <br />
+    <button class="btn btn-primary submit">Submit</button>
+</div>
+{% endblock %}
+{% block script_js %}
+<script type="text/javascript">
+var token;
+var user_id;
+
+$(document).ready(function() {
+    token = localStorage.getItem("authToken");
+
+    if (token == null) {
+        window.location.href = '/index';
+    }
+    $.ajax({
+        url: "/my-profile",
+        type: 'GET',
+        headers: {
+            'Authorization': 'JWT ' + token,
+        },
+        success: function(user) {
+            $('#first_name').val(user.first_name);
+            $('#last_name').val(user.last_name);
+            $('#email').val(user.email);
+            user_id = user.id
+        },
+        error: function(XMLHttpRequest) {
+            if (XMLHttpRequest.status == 401) {
+                window.location.href = '/index';
+            }
+        }
+    });
+
+    $('.submit').click(function() {
+        first_name = $('#first_name').val();
+        last_name = $('#last_name').val();
+        $.ajax({
+            url: '/my-profile',
+            type: 'PATCH',
+            headers: {
+                'Authorization': 'JWT ' + token,
+            },
+            data: { "first_name": first_name, "last_name": last_name },
+            success: function(data) {
+                
+                $('#first_name').val(data.first_name);
+                $('#last_name').val(data.last_name);
+                localStorage.setItem("profile_updated", "profile_updated");
+                window.location.href = "/home";
+            }
+        })
+    });
+});
+</script>
+{% endblock %}

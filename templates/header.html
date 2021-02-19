@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block header %}
+<div class="topnav">
+    <div class="float-right">
+        <a class="active" href="{% url 'home' %}">Home</a>
+        <a href="/add-blog">Add Blog</a>
+        <a href="{% url 'my-profile' %}">My Profile</a>
+        <a href="{% url 'change-password' %}">Change Password</a>
+        <a onclick="logout()">Logout</a>
+    </div>
+</div>
+{% endblock %}
+{% block script_js %}
+<script type="text/javascript">
+function logout() {
+    console.log("jah")
+    localStorage.removeItem("authToken");
+    window.location.href = "/home";
+}
+
+</script>
+{% endblock %}

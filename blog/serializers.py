@@ -73,10 +73,18 @@ class BlogSerializer(serializers.ModelSerializer):
 
 class BlogReadSerializer(serializers.ModelSerializer):
     user = UserShortSerializer()
+    likes = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
+
+    def get_likes(self, obj):
+        return Like.objects.filter(blog=obj).count()
+
+    def get_comments(self, obj):
+        return Comment.objects.filter(blog=obj).count()
 
     class Meta:
         model = Blog
-        fields = ('id', 'user', 'content')
+        fields = ('id', 'user', 'content', 'likes', 'comments')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -89,10 +97,14 @@ class CommentSerializer(serializers.ModelSerializer):
 class CommentReadSerializer(serializers.ModelSerializer):
     user = UserShortSerializer()
     blog = BlogShortSeializer()
+    comments = serializers.SerializerMethodField()
+
+    def get_comments(self, obj):
+        return Comment.objects.filter(blog=obj.blog).count()
 
     class Meta:
         model = Comment
-        fields = ('id', 'user', 'blog', 'content')
+        fields = ('id', 'user', 'blog', 'content', 'comments')
 
 
 class LikeSerializer(serializers.ModelSerializer):
