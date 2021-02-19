@@ -11,6 +11,7 @@ from blog.serializers import (
 )
 
 from shared.views import BaseAPIViewSet
+from shared.filters import UserFilterBackend
 
 
 class BlogAPIViewSet(BaseAPIViewSet):
@@ -19,17 +20,18 @@ class BlogAPIViewSet(BaseAPIViewSet):
 
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
+    filter_backends = (UserFilterBackend, )
 
     def get_response_serializer_class(self):
         return BlogReadSerializer
 
     def get_serializer_class(self):
-        if self.action in ['get', 'retrieve']:
+        if self.action in ['list', 'retrieve']:
             return self.get_response_serializer_class()
         return self.serializer_class
 
 
-class MyPrfileAPIView(RetrieveUpdateAPIView):
+class MyProfileAPIView(RetrieveUpdateAPIView):
     '''
     '''
 
@@ -70,7 +72,7 @@ class CommentAPIViewSet(BaseAPIViewSet):
         return CommentReadSerializer
 
     def get_serializer_class(self):
-        if self.action in ['get', 'retrieve']:
+        if self.action in ['list', 'retrieve']:
             return self.get_response_serializer_class()
         return self.serializer_class
 
@@ -82,9 +84,16 @@ class LikeCreateAPIView(CreateAPIView):
     serializer_class = LikeSerializer
 
     def create(self, request, *args, **kwargs):
-        super().create(request, *args, **kwargs)
+        blog_id = request.data.get('blog')
 
-        return Response({'message': "You have successfully liked the blog."}, status=status.HTTP_201_CREATED)
+        if Like.objects.filter(user=request.user, blog__id=blog_id).exists():
+            Like.objects.filter(user=request.user, blog__id=blog_id).delete()
+        else:
+            super().create(request, *args, **kwargs)
+
+        blog = Blog.objects.get(id=blog_id)
+
+        return Response(BlogReadSerializer(blog).data, status=status.HTTP_201_CREATED)
 
 
 class LikeDeleteAPIView(DestroyAPIView):

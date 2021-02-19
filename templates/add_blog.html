@@ -1,0 +1,57 @@
+{% extends "header.html" %}
+{% block content %}
+<h1>Add Blog</h1>
+<label>Content: </label>
+<br />
+<textarea id="content"></textarea>
+<button class="btn btn-primary post">Post</button>
+<script type="text/javascript">
+
+var user_id;
+var token;
+
+token = localStorage.getItem("authToken");
+
+if (token == null) {
+    window.location.href = '/index';
+}
+$.ajax({
+    url: "/my-profile",
+    type: 'GET',
+    headers: {
+        'Authorization': 'JWT ' + token,
+    },
+    success: function(user) {
+        user_id = user.id
+    },
+    error: function(XMLHttpRequest) {
+        if (XMLHttpRequest.status == 401) {
+            window.location.href = '/index';
+        }
+    }
+});
+
+$('.post').click(function() {
+    content = $('#content').val();
+    console.log(user_id);
+
+    $.ajax({
+        url: "/blogs/",
+        type: "POST",
+        headers: {
+            'Authorization': 'JWT ' + token,
+        },
+
+        data: {
+          'user': user_id,
+          'content': content,
+        },
+
+        success: function(data) {
+            localStorage.setItem('blog_created', true);
+            window.location.href = "/home"
+        }
+    })
+})
+</script>
+{% endblock %}

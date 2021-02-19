@@ -9,14 +9,14 @@ class UserAdmin(UserAdmin):
     ordering = ('email', )
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('email', 'password', 'first_name', 'last_name')}),
         (('Permissions'), {'fields': ('is_active', 'is_superuser')}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2'),
+            'fields': ('email', 'password1', 'password2', 'first_name', 'last_name'),
         }),
     )
 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Blog api</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+
+<body>
+  Email:<br>
+  <input type="text" name="email" id="email">
+  <br>
+  Password:<br>
+  <input type="password" name="password" id="password">
+  <br><br>
+  <input type="submit" value="Submit" class="apireq">
+
+    <script type="text/javascript">
+    var token;
+
+    $(document).ready(function(){
+      // token = localStorage.getItem("authToken")
+      // if (token != null){
+      //   window.location.href = '/home';
+      // }
+
+      $(".apireq").click(function(){
+          email = $('#email').val();
+          password = $('#password').val();
+          $.ajax({
+                  url: "http://localhost:8001/login",
+                  type: 'POST',
+                  // dataType: "json",
+                  data: {'email': email, 'password': password},
+                  success: function(data1) {
+                      localStorage.setItem("authToken", data1['token'])
+                      window.location.href = 'http://localhost:8001/home';
+
+                      // $('#first_name').text(data[0].first_name);
+                      // $('#last_name').text(data[0].last_name);
+                      // $('#age').text(data[0].age);
+                      // $('#gender').text(data[0].gender);
+                  }
+              });
+        });
+    });
+    </script>
+</body>
+
+</html>

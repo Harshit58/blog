@@ -1,0 +1,188 @@
+{% extends "header.html" %}
+{% block content %}
+<div style="margin-top: 20px;"><input type="text" name="search" id="search" /><button class="search btn btn-primary" id="search_button" style="margin-left: 10px;">Search</button></div>
+<h3 style="text-align: center;"> Welcome the Blogs</h3>
+<div id="blog_list">
+</div>
+{% endblock content %}
+{% block script_js %}
+<script type="text/javascript">
+var user_id;
+var token;
+
+if ('{{ request.GET.change_password_success }}') {
+    $.toast({
+        text: 'Password Changed.',
+        position: 'top-right'
+    });
+}
+if (localStorage.getItem("profile_updated") != null) {
+  $.toast({
+    text: 'Profile Updated.',
+    position: 'top-right'
+  });
+  localStorage.removeItem("profile_updated");
+}
+
+if (localStorage.getItem("blog_created") != null) {
+  $.toast({
+    text: 'Blog created.',
+    position: 'top-right'
+  });
+  localStorage.removeItem("blog_created");
+}
+
+token = localStorage.getItem("authToken");
+
+if (token == null) {
+    window.location.href = '/index';
+}
+$.ajax({
+    url: "/my-profile",
+    type: 'GET',
+    headers: {
+        'Authorization': 'JWT ' + token,
+    },
+    success: function(user) {
+        user_id = user.id
+    },
+    error: function(XMLHttpRequest) {
+        if (XMLHttpRequest.status == 401) {
+            window.location.href = '/index';
+        }
+    }
+});
+$.ajax({
+    url: "http://localhost:8001/blogs/",
+    type: 'GET',
+    headers: {
+        'Authorization': 'JWT ' + token,
+    },
+
+    success: function(data) {
+      get_blogs(data);
+    }
+});
+
+$('#search').keyup(function() {
+    search_content = $('#search').val();
+    if (search_content != null) {
+        $.ajax({
+            url: "/blogs/?q=" + search_content,
+            type: "GET",
+            headers: {
+                'Authorization': 'JWT ' + token
+            },
+            success: function(data) {
+                get_blogs(data);
+            }
+        })
+    }
+});
+
+$('#search_button').click(function() {
+    search_content = $('#search').val();
+
+    if (search_content != null) {
+        $.ajax({
+            url: "/blogs/?q=" + search_content,
+            type: "GET",
+            headers: {
+                'Authorization': 'JWT ' + token
+            },
+            success: function(data) {
+              get_blogs(data);
+            }
+        })
+    }
+});
+
+function get_blogs(data) {
+    $('#blog_list').html('');
+    var div3Content = '';
+
+    for (var i = 0; i < data.length; i++) {
+          div3Content += '<div style="width:33%; float=left; display:inline-block;" id="blog_' + data[i].id + '"><b>' + data[i].user['email'] + '</b>';
+          if (data[i].user['id'] == user_id) {
+              div3Content += '<div><span onclick="delete_blog(' + data[i].id + ')" class="glyphicon glyphicon-trash"></span></div>'
+          }
+          div3Content += '<p>' + data[i].content + '</p><span onclick="add_like(' + data[i].id + ')" class="glyphicon glyphicon-thumbs-up">' + data[i].likes + '</span><span class="glyphicon glyphicon-comment" style="margin-left:10px;">' + data[i].comments + '</span><br>'
+          div3Content += '<div>Write a comment.<br><input type="text" style="30%" name="comment" id="comment_' + data[i].id + '"/></div><button class="btn btn-primary" onclick="add_comment(' + data[i].id + ')" style="width: 20%; margin-top: 10px;">Comment</button></div>'
+        }
+    $("#blog_list").append(div3Content);
+}
+
+function add_like(blog_id) {
+  $.ajax({
+      url: "http://localhost:8001/blogs/like",
+      type: 'POST',
+      headers: {
+          'Authorization': 'JWT ' + token,
+      },
+      data: {
+          'user': this.user_id,
+          'blog': blog_id
+      },
+
+      success: function(data) {
+        $('#blog_' + data.id + ' .glyphicon-thumbs-up').html(data.likes);
+      }
+  });
+}
+
+function add_comment(blog_id) {
+    content = $('#comment_' + blog_id).val();
+
+    $.ajax({
+        url: "/blogs/comment/",
+        type: "POST",
+        headers: {
+            'Authorization': 'JWT ' + token,
+        },
+        data: {
+            "user": user_id,
+            "blog": blog_id,
+            "content": content
+        },
+        success: function(data) {
+            $('#blog_' + data.blog.id + ' .glyphicon-comment').html(data.comments);
+            $('#comment_' + data.blog.id).val('')
+        }
+    });
+}
+
+function delete_blog(blog_id) {
+  $.ajax({
+    url: "/blogs/" + blog_id,
+    type: 'DELETE',
+    headers: {
+      'Authorization': 'JWT ' + token,
+    },
+
+    success: function(data) {
+      $.ajax({
+        url: "http://localhost:8001/blogs/",
+        type: 'GET',
+        headers: {
+            'Authorization': 'JWT ' + token,
+        },
+
+        success: function(data) {
+          get_blogs(data);
+        }
+      });
+    }
+  });
+}
+function add_blog() {
+  window.location.href = "/add-blog";
+}
+
+function logout() {
+    console.log("jah")
+    localStorage.removeItem("authToken");
+    window.location.href = "/home";
+}
+
+</script>
+{% endblock %}

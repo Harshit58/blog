@@ -11,12 +11,15 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import dotenv
 
 from django.utils import timezone
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Setup environment from .env file
+dotenv.read_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -27,7 +30,7 @@ SECRET_KEY = 'sr=9+c24i4)#029vqa*ijav%xqgfocwpevurx^tvo4$pl+zsnf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -42,6 +45,7 @@ INSTALLED_APPS = [
 
     # third party apps
     'rest_framework',
+    'corsheaders',
 
     # In house apps
     'blog',
@@ -64,7 +68,7 @@ ROOT_URLCONF = 'blog_api.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -86,7 +90,11 @@ WSGI_APPLICATION = 'blog_api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'blog',
+        'NAME': os.getenv("POSTGRES_DB", 'blog'),
+        'USER': os.getenv("POSTGRES_USER", 'test'),
+        'PASSWORD': os.getenv("POSTGRES_PASSWORD", 'test'),
+        'HOST': os.getenv("DATABASE_URL", 'localhost'),
+        'PORT': os.getenv("POSTGRES_PORT", '5432')
     }
 }
 
@@ -130,6 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 AUTH_USER_MODEL = 'blog.User'
 
@@ -151,3 +160,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
