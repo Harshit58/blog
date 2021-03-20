@@ -9,7 +9,7 @@ djangorestframework-jwt==1.11.0
 django-dotenv==1.4.2
 idna==2.8
 itypes==1.1.0
-Jinja2==2.10.3
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 psycopg2==2.8.4
 PyJWT==1.7.1
